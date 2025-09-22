@@ -11,9 +11,9 @@ vagrant up
 
 vagrant ssh operations-control
 
-vagrant@operations-control:~$ mkdir -p $HOME/.kube
-vagrant@operations-control:~$ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-vagrant@operations-control:~$ sudo chown $(id -u):$(id -g) $HOME/.kube/config
+ mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 vagrant@operations-control:~$ kubectl get nodes
 NAME                 STATUS   ROLES           AGE     VERSION

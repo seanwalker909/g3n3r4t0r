@@ -45,6 +45,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           sudo sysctl -w net.ipv4.ip_forward=1
           echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
 
+          # Load br_netfilter and set required sysctls for Flannel
+          sudo modprobe br_netfilter
+          cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+          sudo sysctl --system
+
           # Install dependencies
           sudo apt-get update
           sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common
@@ -53,20 +61,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           sudo apt-get install -y containerd
           sudo systemctl enable --now containerd
 
-          # Add Kubernetes apt repo (pkgs.k8s.io)
+          # Add Kubernetes apt repo (v1.31 stable)
           sudo mkdir -p /etc/apt/keyrings
           curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
           echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
-          # Update apt and install latest 1.31.x Kubernetes packages
           sudo apt-get update
-          LATEST_VERSION=$(apt-cache madison kubelet | grep 1.31 | head -1 | awk '{print $3}')
-          sudo apt-get install -y kubelet=$LATEST_VERSION kubeadm=$LATEST_VERSION kubectl=$LATEST_VERSION kubernetes-cni cri-tools
+          sudo apt-get install -y kubelet kubeadm kubectl kubernetes-cni cri-tools
           sudo apt-mark hold kubelet kubeadm kubectl
 
           # Initialize control-plane nodes
           if [[ "#{role}" == "control" ]]; then
-            sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=#{opts[:ip]}
+            sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=#{opts[:ip]} --kubernetes-version=v1.31.13
 
             # Configure kubectl for vagrant user
             mkdir -p $HOME/.kube
@@ -76,7 +82,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             # Install Flannel CNI
             kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 
-            # Output join command to a file for workers
+            # Output join command for workers
             kubeadm token create --print-join-command > /vagrant/#{cluster_name}-join.sh
           fi
 
