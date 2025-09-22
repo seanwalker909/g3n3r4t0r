@@ -1,3 +1,8 @@
+#M1
+#2 Clusters:
+# - operations
+# - production-us-1
+
 Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-20.04-arm64"
 
