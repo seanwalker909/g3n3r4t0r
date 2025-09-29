@@ -20,6 +20,13 @@ NAME                 STATUS   ROLES           AGE     VERSION
 operations-control   Ready    control-plane   6m4s    v1.31.13
 operations-worker    Ready    <none>          4m44s   v1.31.13
 
+#run this ssh-ed onto the VM, to get kubeconfig
+sudo cat /etc/kubernetes/admin.conf
+
+exit #exit vagrant ssh
+
+#copy paste config to local machine:
+vi ~/.kube/config
 
 # Install Argo CD
 # https://argo-cd.readthedocs.io/en/stable/getting_started/
@@ -27,6 +34,10 @@ operations-worker    Ready    <none>          4m44s   v1.31.13
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
+#get argo initial admin pw
+kubectl -n argocd get secrets -o yaml
+
+#open UI, can be done from local machine, thanks to kube config copy above
 kubectl port-forward po/argocd-server-d9f4b856-7b5wh -n argocd 8080:8080
 ```
 
