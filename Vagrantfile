@@ -55,11 +55,18 @@ EOF
 
           # Install dependencies
           sudo apt-get update
-          sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common
+          sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common build-essential
 
           # Install containerd
           sudo apt-get install -y containerd
           sudo systemctl enable --now containerd
+
+          # Install Argo CD CLI
+          export ARGOCD_VERSION=$(curl --silent "https://api.github.com/repos/argoproj/argo-cd/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+          curl -sSL -o /tmp/argocd-${ARGOCD_VERSION} https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-arm64
+
+          chmod +x /tmp/argocd-${ARGOCD_VERSION}
+          sudo mv /tmp/argocd-${ARGOCD_VERSION} /usr/local/bin/argocd
 
           # Add Kubernetes apt repo (v1.31 stable)
           sudo mkdir -p /etc/apt/keyrings

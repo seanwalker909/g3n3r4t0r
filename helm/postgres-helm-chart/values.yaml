@@ -1,0 +1,22 @@
+postgresql:
+  image:
+    repository: postgres
+    tag: "14"  # Specify the desired PostgreSQL version
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 5432
+  persistence:
+    enabled: true
+    storageClass: "standard"  # Specify the storage class
+    size: 10Gi  # Specify the desired size for the PVC
+  postgresqlUsername: admin
+  postgresqlPassword: admin123  # Change this to a secure password
+  postgresqlDatabase: mydatabase  # Specify the name of the database to create
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
