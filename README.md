@@ -27,7 +27,7 @@ operations-worker    Ready    <none>          4m44s   v1.31.13
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-
+kubectl port-forward po/argocd-server-d9f4b856-7b5wh -n argocd 8080:8080
 ```
 
 stop:
